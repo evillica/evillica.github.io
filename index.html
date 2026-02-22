@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>EVILLICA Desktop</title>
+<style>
+  :root{
+    --teal:#008080;
+    --win-gray:#c0c0c0;
+    --win-dark:#808080;
+    --win-light:#ffffff;
+    --win-shadow:#404040;
+    --blue:#000080;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--teal);
+    font-family: Arial, Helvetica, sans-serif;
+    height:100vh;
+    overflow:hidden;
+  }
+
+  /* top bar */
+  .topbar{
+    height:44px;
+    background:var(--win-gray);
+    border-bottom:2px solid var(--win-shadow);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:6px 10px;
+  }
+  .btn{
+    background:var(--win-gray);
+    border-top:2px solid var(--win-light);
+    border-left:2px solid var(--win-light);
+    border-right:2px solid var(--win-dark);
+    border-bottom:2px solid var(--win-dark);
+    padding:6px 10px;
+    font-size:14px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .btn:active{
+    border-top:2px solid var(--win-dark);
+    border-left:2px solid var(--win-dark);
+    border-right:2px solid var(--win-light);
+    border-bottom:2px solid var(--win-light);
+  }
+
+  .searchWrap{
+    flex:1;
+    display:flex;
+    justify-content:center;
+  }
+  .search{
+    width:min(520px, 92vw);
+    background:#fff;
+    border-top:2px solid var(--win-dark);
+    border-left:2px solid var(--win-dark);
+    border-right:2px solid var(--win-light);
+    border-bottom:2px solid var(--win-light);
+    padding:8px 10px;
+    font-size:14px;
+    outline:none;
+  }
+
+  /* desktop icons */
+  .desktop{
+    height:calc(100vh - 44px);
+    padding:18px;
+    display:grid;
+    grid-template-columns: repeat(4, minmax(70px, 90px));
+    grid-auto-rows: 92px;
+    gap:18px;
+    align-content:start;
+  }
+  .icon{
+    width:90px;
+    text-align:center;
+    color:white;
+    font-size:12px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .icon .ico{
+    width:48px;height:48px;
+    margin:0 auto 6px;
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+  }
+  .icon .label{
+    padding:2px 4px;
+    display:inline-block;
+    background:rgba(0,0,0,.15);
+  }
+
+  /* window */
+  .window{
+    position:fixed;
+    left:8vw;
+    top:18vh;
+    width:min(640px, 92vw);
+    background:var(--win-gray);
+    border-top:2px solid var(--win-light);
+    border-left:2px solid var(--win-light);
+    border-right:2px solid var(--win-shadow);
+    border-bottom:2px solid var(--win-shadow);
+    display:none;
+  }
+  .titlebar{
+    background:var(--blue);
+    color:white;
+    padding:6px 8px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:14px;
+  }
+  .winBtns{
+    display:flex; gap:6px;
+  }
+  .winBtn{
+    width:26px;height:22px;
+    background:var(--win-gray);
+    color:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    border-top:2px solid var(--win-light);
+    border-left:2px solid var(--win-light);
+    border-right:2px solid var(--win-dark);
+    border-bottom:2px solid var(--win-dark);
+    cursor:pointer;
+  }
+  .content{
+    padding:12px;
+    font-family: "Courier New", monospace;
+    font-size:14px;
+    color:#000;
+    background:#e6e6e6;
+    min-height:180px;
+  }
+
+  /* small hint */
+  .hint{
+    position:fixed;
+    right:12px;
+    bottom:12px;
+    color:rgba(255,255,255,.8);
+    font-size:12px;
+  }
+</style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="btn" onclick="openWindow('aboutWin')">Menu</div>
+    <div class="btn" onclick="openWindow('filesWin')">Files</div>
+
+    <div class="searchWrap">
+      <input class="search" id="search" placeholder="Search the archive..." />
+    </div>
+
+    <div class="btn" onclick="openWindow('helpWin')">Help</div>
+  </div>
+
+  <div class="desktop">
+    <div class="icon" onclick="openWindow('filesWin')">
+      <div class="ico">PC</div>
+      <div class="label">My Computer</div>
+    </div>
+
+    <div class="icon" onclick="openWindow('buffWin')">
+      <div class="ico">EXE</div>
+      <div class="label">BUFF.EXE</div>
+    </div>
+
+    <div class="icon" onclick="openWindow('logWin')">
+      <div class="ico">TXT</div>
+      <div class="label">log_1995.txt</div>
+    </div>
+
+    <div class="icon" onclick="openWindow('aboutWin')">
+      <div class="ico">?</div>
+      <div class="label">Read Me</div>
+    </div>
+  </div>
+
+  <!-- WINDOWS -->
+  <div class="window" id="aboutWin">
+    <div class="titlebar">
+      <div>Read Me</div>
+      <div class="winBtns">
+        <div class="winBtn" onclick="closeWindow('aboutWin')">X</div>
+      </div>
+    </div>
+    <div class="content">
+      Welcome.<br><br>
+      This archive is unstable.<br>
+      Proceed carefully.
+    </div>
+  </div>
+
+  <div class="window" id="filesWin">
+    <div class="titlebar">
+      <div>My Computer</div>
+      <div class="winBtns">
+        <div class="winBtn" onclick="closeWindow('filesWin')">X</div>
+      </div>
+    </div>
+    <div class="content" id="filesContent">
+      Folders:<br>
+      • /fragments<br>
+      • /footage<br>
+      • /corrupted
+    </div>
+  </div>
+
+  <div class="window" id="buffWin">
+    <div class="titlebar">
+      <div>BUFF.EXE</div>
+      <div class="winBtns">
+        <div class="winBtn" onclick="closeWindow('buffWin')">X</div>
+      </div>
+    </div>
+    <div class="content">
+      Initializing session...<br>
+      Access level: GUEST<br><br>
+      Type: <b>enter</b> in the top search bar.
+    </div>
+  </div>
+
+  <div class="window" id="logWin">
+    <div class="titlebar">
+      <div>log_1995.txt</div>
+      <div class="winBtns">
+        <div class="winBtn" onclick="closeWindow('logWin')">X</div>
+      </div>
+    </div>
+    <div class="content">
+      00:00 signal detected<br>
+      00:03 watcher moved<br>
+      00:04 user noticed nothing
+    </div>
+  </div>
+
+  <div class="window" id="helpWin">
+    <div class="titlebar">
+      <div>Help</div>
+      <div class="winBtns">
+        <div class="winBtn" onclick="closeWindow('helpWin')">X</div>
+      </div>
+    </div>
+    <div class="content">
+      Hint: Some commands unlock hidden folders.<br>
+      Try: <b>enter</b>
+    </div>
+  </div>
+
+  <div class="hint">Tip: tap icons to open windows</div>
+
+<script>
+  function openWindow(id){
+    const w = document.getElementById(id);
+    w.style.display = "block";
+  }
+  function closeWindow(id){
+    const w = document.getElementById(id);
+    w.style.display = "none";
+  }
+
+  // simple command/search
+  const search = document.getElementById("search");
+  search.addEventListener("keydown", (e) => {
+    if(e.key !== "Enter") return;
+    const v = search.value.trim().toLowerCase();
+
+    if(v === "enter"){
+      openWindow("filesWin");
+      document.getElementById("filesContent").innerHTML =
+        "Access granted.<br><br>Folders:<br>• /fragments<br>• /footage<br>• <b>/corrupted</b><br><br>Warning: corrupted folder may trigger a breach.";
+      search.value = "";
+      return;
+    }
+
+    if(v === "corrupted"){
+      openWindow("buffWin");
+      alert("SYSTEM BREACH DETECTED.");
+      search.value = "";
+      return;
+    }
+
+    alert("No results found.");
+  });
+</script>
+</body>
+</html>
