@@ -212,28 +212,46 @@
     color:#fff;
   }
 
-  /* Screamer overlay (placeholder) */
-  .overlay{
+  /* BREACH (screamer) overlay */
+  #breachOverlay{
     position:fixed;
     inset:0;
     background:#000;
     display:none;
-    z-index:999;
+    z-index:99999;
+    overflow:hidden;
   }
-  .overlay .terminal{
+  #breachText{
+    position:absolute;
+    inset:0;
+    padding:22px;
     color:#ff2b2b;
     font-family:"Courier New", monospace;
-    font-size:14px;
-    padding:24px;
-    white-space:pre-line;
+    font-size:16px;
+    line-height:1.12;
+    white-space:pre-wrap;
+    word-break:break-word;
+    opacity:0.95;
   }
-  .overlay .hint{
-    position:fixed;
-    left:24px;
-    bottom:24px;
-    color:#ff2b2b;
-    font-family:"Courier New", monospace;
-    opacity:.8;
+  #breachMonster{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:min(78vw, 520px);
+    transform:translate(-50%, -50%) scale(1.35);
+    display:none;
+    image-rendering:pixelated;
+    filter:contrast(1.2) saturate(0.9);
+  }
+  .breachShake{
+    animation:breachShake 0.07s infinite;
+  }
+  @keyframes breachShake{
+    0%   { transform:translate(calc(-50% + 2px), calc(-50% - 2px)) scale(1.35); }
+    25%  { transform:translate(calc(-50% - 3px), calc(-50% + 2px)) scale(1.35); }
+    50%  { transform:translate(calc(-50% + 3px), calc(-50% + 3px)) scale(1.35); }
+    75%  { transform:translate(calc(-50% - 2px), calc(-50% - 3px)) scale(1.35); }
+    100% { transform:translate(calc(-50% + 2px), calc(-50% + 2px)) scale(1.35); }
   }
 </style>
 </head>
@@ -278,7 +296,7 @@
       Welcome to the EVILLICA archive.<br><br>
       This system mimics a familiar desktop.<br>
       Some folders are interactive. Some are not.<br><br>
-      <span class="pill">Tip:</span> Use the search box for commands later.
+      <span class="pill">Tip:</span> Type <b>EVILLICA</b> in Search.
     </div>
   </div>
 
@@ -356,15 +374,15 @@
     <div class="menuItem" onclick="triggerTrap(); toggleStart(false)">Recycle Bin</div>
   </div>
 
-  <!-- Screamer overlay (placeholder) -->
-  <div class="overlay" id="overlay">
-    <div class="terminal" id="overlayText"></div>
-    <div class="hint">tap to return</div>
+  <!-- BREACH overlay -->
+  <div id="breachOverlay" aria-hidden="true">
+    <div id="breachText"></div>
+    <img id="breachMonster" src="monster.png" alt="">
   </div>
 
 <script>
-  // windows open/close + z-index focus
   let z = 20;
+
   function openWin(id){
     const w = document.getElementById(id);
     w.style.display = "block";
@@ -375,7 +393,6 @@
     w.style.display = "none";
   }
 
-  // Start menu
   const startMenu = document.getElementById("startMenu");
   function toggleStart(force){
     if(typeof force === "boolean"){
@@ -384,14 +401,13 @@
     }
     startMenu.style.display = (startMenu.style.display === "block") ? "none" : "block";
   }
+
   document.addEventListener("click", (e)=>{
-    // click outside start menu closes it
     const isStartBtn = e.target.classList.contains("startBtn");
     const inMenu = startMenu.contains(e.target);
     if(!isStartBtn && !inMenu) toggleStart(false);
   });
 
-  // Clock
   const clock = document.getElementById("clock");
   function tick(){
     const d = new Date();
@@ -401,46 +417,7 @@
   }
   tick(); setInterval(tick, 1000);
 
-  // Trap (placeholder screamer mode)
-  const overlay = document.getElementById("overlay");
-  const overlayText = document.getElementById("overlayText");
-  function triggerTrap(){
-    overlayText.textContent =
-`FATAL ERROR: MEMORY LEAK
-CODE: 0xEVI11ICA
-
-UNAUTHORIZED ACCESS DETECTED
-INITIATING CONTAINMENT...`;
-    overlay.style.display = "block";
-    // позже сюда добавим: картинку монстра + звук + красный терминал
-  }
-  overlay.addEventListener("click", ()=>{
-    overlay.style.display = "none";
-  });
-
-  // Simple command/search input (заготовка)
-  const search = document.getElementById("search");
-  search.addEventListener("keydown", (e)=>{
-    if(e.key !== "Enter") return;
-    const v = search.value.trim().toLowerCase();
-    if(!v) return;
-
-    if(v === "help"){
-      openWin("winReadme");
-      search.value = "";
-      return;
-    }
-    if(v === "recycle" || v === "bin"){
-      triggerTrap();
-      search.value = "";
-      return;
-    }
-
-    alert("No results.");
-    search.value = "";
-  });
-
-  // Drag windows (very lightweight)
+  /* Drag windows */
   let dragId = null, offX = 0, offY = 0;
   document.addEventListener("mousedown", (e)=>{
     const bar = e.target.closest(".titlebar");
@@ -459,6 +436,117 @@ INITIATING CONTAINMENT...`;
     w.style.top  = Math.max(0, e.clientY - offY) + "px";
   });
   document.addEventListener("mouseup", ()=> dragId = null);
+
+  /* ===== BREACH (screamer) logic ===== */
+  const breach = {
+    clicks: 0,
+    threshold: 5,
+    active: false
+  };
+
+  const breachOverlay = document.getElementById("breachOverlay");
+  const breachText = document.getElementById("breachText");
+  const breachMonster = document.getElementById("breachMonster");
+
+  function startBreach(){
+    if (breach.active) return;
+    breach.active = true;
+
+    breachOverlay.style.display = "block";
+    breachText.textContent = "";
+    breachMonster.style.display = "none";
+    breachMonster.classList.remove("breachShake");
+
+    const phrases = [
+      "ERROR", "ERROR", "ERROR", "ERROR",
+      "SYSTEM ERROR", "MEMORY FAULT", "ACCESS DENIED",
+      "BREACH DETECTED", "UNAUTHORIZED ACTIVITY", "FATAL EXCEPTION"
+    ];
+
+    const maxChars = 7000;
+    const durationMs = 900;
+    const started = Date.now();
+
+    const interval = setInterval(() => {
+      if (breachText.textContent.length < maxChars) {
+        let line = "";
+        for (let i = 0; i < 12; i++) {
+          line += phrases[Math.floor(Math.random() * phrases.length)] + " ";
+        }
+        breachText.textContent += line + "\n";
+      }
+
+      if (Date.now() - started >= durationMs || breachText.textContent.length >= maxChars) {
+        clearInterval(interval);
+
+        setTimeout(() => {
+          breachMonster.style.display = "block";
+          breachMonster.classList.add("breachShake");
+
+          setTimeout(() => {
+            breachMonster.classList.remove("breachShake");
+            breachMonster.style.display = "none";
+            breachOverlay.style.display = "none";
+            breach.active = false;
+            breach.clicks = 0;
+          }, 1400);
+        }, 80);
+      }
+    }, 18);
+  }
+
+  /* Trigger on 5th click of “normal UI” */
+  document.addEventListener("click", (e) => {
+    if (breach.active) return;
+
+    const hit =
+      e.target.closest(".icon") ||
+      e.target.closest(".startBtn") ||
+      e.target.closest(".menuItem") ||
+      e.target.closest(".winBtn");
+
+    if (!hit) return;
+
+    breach.clicks += 1;
+    if (breach.clicks >= breach.threshold) startBreach();
+  });
+
+  /* Secret word in Search triggers instantly */
+  const search = document.getElementById("search");
+  search.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter") return;
+
+    const raw = (search.value || "").trim();
+    if (!raw) return;
+
+    if (raw.toUpperCase() === "EVILLICA") {
+      search.value = "";
+      startBreach();
+      return;
+    }
+
+    const v = raw.toLowerCase();
+
+    if (v === "help") {
+      openWin("winReadme");
+      search.value = "";
+      return;
+    }
+
+    if (v === "recycle" || v === "bin") {
+      triggerTrap();
+      search.value = "";
+      return;
+    }
+
+    alert("No results.");
+    search.value = "";
+  });
+
+  /* Recycle Bin uses the same breach effect */
+  function triggerTrap(){
+    startBreach();
+  }
 </script>
 </body>
 </html>
